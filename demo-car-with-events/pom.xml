@@ -15,5 +15,8 @@
 	    <module>demo-car-common</module>
 	    <module>demo-car-consumer-with-subscribing</module>
 	    <module>demo-car-provider-with-publishing</module>
+	    <module>demo-quality-inspection-service</module>
+	    <module>demo-maintenance-recommendation-service</module>
+	    <module>demo-traceability-log-service</module>
 	</modules>
 </project>
