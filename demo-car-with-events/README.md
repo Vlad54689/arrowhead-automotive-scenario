@@ -92,48 +92,8 @@ This scenario implements a complete **automotive quality maintenance traceabilit
 
 ### Architecture
 
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                        Arrowhead Local Cloud                                │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌───────────────────┐  │
-│  │   Registry  │  │ Authorization│  │ Orchestrator│  │   Event Handler   │  │
-│  └─────────────┘  └─────────────┘  └─────────────┘  └───────────────────┘  │
-└─────────────────────────────────────────────────────────────────────────────┘
-         │                │                  │                    │
-         │                │                  │                    │
-         ▼                ▼                  ▼                    ▼
-┌──────────────┐  ┌────────────────┐  ┌──────────────┐  ┌────────────────┐
-│Quality       │  │Maintenance     │  │Traceability  │  │Car             │
-│Inspection    │  │Recommendation  │  │Log           │  │Service         │
-│Service       │  │Service         │  │Service       │  │Service         │
-│(Publisher)   │  │(Consumer+      │  │(Consumer)    │  │(Consumer)      │
-│             │  │ Publisher)     │  │              │  │                │
-└──────┬───────┘  └───────┬────────┘  └──────┬───────┘  └───────┬────────┘
-       │                 │                   │                  │
-       │ publishes       │                   │                  │
-       │ quality         │ consumes          │                  │
-       │ inspection      │──────────────────▶│                  │
-       │ events          │                   │                  │
-       │                 │                   │                  │
-       │                 │ publishes         │                  │
-       │                 │ maintenance       │                  │
-       │                 │ recommendation    │                  │
-       │                 │ events            │                  │
-       │                 │──────────────────▶│                  │
-       │                 │                   │                  │
-       │                 │                   │ consumes         │
-       │                 │                   │ traceability     │
-       │                 │                   │ logs             │
-       │                 │                   │─────────────────▶│
-       │                 │                   │                  │
-       │                 │                   │                  │ consumes
-       │                 │                   │                  │ maintenance
-       │                 │                   │                  │ recommendations
-       │                 │                   │                  │────────┐
-       └────────────────▶│                   │                          │
-                         │                   │                          │
-                         └───────────────────┴──────────────────────────┘
-```
+<img width="1491" height="1055" alt="image" src="https://github.com/user-attachments/assets/760cbbc1-586c-40d1-8571-9960d9d11dd4" />
+
 
 ### Services
 
