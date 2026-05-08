@@ -126,17 +126,7 @@ This scenario implements a complete **automotive quality maintenance traceabilit
 
 The complete traceability chain ensures full auditability:
 
-```
-Quality Inspection Event
-        │
-        ▼
-Maintenance Recommendation Event
-        │
-        ▼
-Car Service Update
-        │
-        └──> All events logged by Traceability Log Service
-```
+<img width="528" height="87" alt="Screenshot_20260508_125954" src="https://github.com/user-attachments/assets/31f9d279-9091-46f1-b184-09b4f0853b69" />
 
 ### How to Run
 
