@@ -52,6 +52,66 @@ Returns a car list based on the given parameters.
 }]
 ```
 
+## General Scenario Description
+
+The *Automotive Quality Maintenance Traceability Scenario* demonstrates an event-driven distributed architecture implemented using the Eclipse Arrowhead Framework. The scenario models a collaborative ecosystem of automotive microservices that exchange information through publish-subscribe mechanisms coordinated by the Arrowhead core systems. The main objective is to ensure complete traceability of vehicle inspections, maintenance recommendations, and maintenance history updates across the entire automotive service lifecycle.
+
+The architecture integrates four application services: the *Quality Inspection Service*, the *Maintenance Recommendation Service*, the *Traceability Log Service*, and the *Car Service*. These services interact through the Arrowhead Event Handler, while orchestration, authorization, and service discovery are managed by the Arrowhead core systems. The scenario highlights how decoupled microservices can cooperate asynchronously to support auditability, predictive maintenance, operational transparency, and scalable industrial automation.
+
+The workflow begins when a quality inspection event is generated for a vehicle. The Maintenance Recommendation Service consumes the inspection event and automatically produces maintenance recommendations. These recommendations are then consumed by the Car Service to update the maintenance history of the corresponding vehicle. Simultaneously, the Traceability Log Service records all generated events, creating a complete audit trail that can later be queried for compliance, diagnostics, or analytics purposes.
+
+---
+
+# Architecture Diagram Description
+
+The architecture diagram presents a high-level overview of the Automotive Quality Maintenance Traceability ecosystem deployed inside an Arrowhead Local Cloud. The upper section illustrates the Arrowhead core systems, namely the Service Registry, Authorization, Orchestrator, and Event Handler, which collectively provide service discovery, access control, orchestration, and event management functionalities.
+
+The lower section contains the business services participating in the scenario. The *Quality Inspection Service* acts as an event publisher by generating quality inspection events. The *Maintenance Recommendation Service* consumes these events and publishes maintenance recommendations. The *Traceability Log Service* subscribes to all important events to maintain a complete audit history, while the *Car Service* consumes maintenance recommendations to update vehicle maintenance records.
+
+The diagram emphasizes the event-driven communication model, where services interact asynchronously through event publication and subscription rather than through tightly coupled direct communication. This architectural approach increases scalability, modularity, and fault tolerance.
+
+---
+
+# Message Sequence Chart (MSC) Description
+
+The Message Sequence Chart illustrates the chronological interaction between the participating services and the Arrowhead infrastructure during the execution of the traceability workflow. Each vertical lifeline represents a service or core system, while horizontal arrows represent requests, event publications, and event deliveries.
+
+The sequence starts when an external actor submits a quality inspection request to the Quality Inspection Service. After processing the inspection, the service publishes a `quality.inspection.created` event through the Arrowhead Event Handler. The Maintenance Recommendation Service receives the event, generates a recommendation, and subsequently publishes a `maintenance.recommendation.created` event.
+
+The Traceability Log Service receives and stores both event types, ensuring complete auditability. The Car Service consumes the maintenance recommendation event and updates the vehicle maintenance history accordingly. The MSC clearly highlights the asynchronous publish-subscribe interactions enabled by the Event Handler and demonstrates the distributed orchestration of automotive microservices.
+
+---
+
+# UML Component Diagram Description
+
+The UML Component Diagram presents the internal software organization of the system by illustrating the main application components, their interfaces, dependencies, and exchanged data structures. Each application service is represented as an independent component containing REST controllers, business logic modules, event consumers, and event publishers.
+
+The diagram shows how the *Quality Inspection Service* exposes inspection APIs and publishes inspection events. The *Maintenance Recommendation Service* contains both consumer and publisher modules, enabling it to process incoming events and generate new ones. The *Traceability Log Service* focuses on persistent event logging, while the *Car Service* updates vehicle maintenance records based on received recommendations.
+
+Additionally, the diagram highlights shared DTOs and event models used across the system, ensuring interoperability between services. The relationships between components emphasize loose coupling, event-driven communication, and modular software design principles consistent with microservice architectures.
+
+---
+
+# UML Deployment Diagram Description
+
+The UML Deployment Diagram illustrates the physical deployment structure of the automotive traceability system. It describes how the Arrowhead core systems and application services are distributed across network nodes and interconnected through secure communication channels.
+
+The upper section represents the Arrowhead core systems deployed as independent infrastructure nodes responsible for orchestration, authorization, service registration, and event distribution. The lower section contains the application services, each deployed as standalone Spring Boot applications packaged as executable JAR artifacts.
+
+The deployment view also illustrates the communication ports used by each service and highlights the use of secure HTTPS/TLS communication within the Arrowhead Local Cloud. Event-based interactions between services are represented separately from standard REST communication, emphasizing the hybrid communication architecture that combines synchronous APIs with asynchronous event propagation.
+
+---
+
+# UML Activity Diagram with Swimlanes Description
+
+The UML Activity Diagram with Swimlanes models the operational workflow of the traceability scenario by separating responsibilities among participating services. Each swimlane corresponds to a specific service or actor involved in the process execution.
+
+The workflow begins with the external actor initiating a quality inspection request. The Quality Inspection Service validates and stores the inspection data before publishing a corresponding event. The Maintenance Recommendation Service then receives the event, generates maintenance recommendations, and publishes a new maintenance recommendation event.
+
+Next, the Traceability Log Service records all generated events for audit and compliance purposes. The Car Service consumes the maintenance recommendation event and updates the vehicle maintenance history accordingly. Finally, the traceability logs can be queried by external actors for monitoring and analysis.
+
+This activity diagram clearly illustrates the control flow, event flow, and distribution of responsibilities within the event-driven architecture, making the operational behavior of the system easier to understand.
+
 ## How to run?
 1. Clone this repo to your local machine.
 
