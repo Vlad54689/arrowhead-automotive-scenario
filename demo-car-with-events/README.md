@@ -113,6 +113,7 @@ The deployment view also illustrates the communication ports used by each servic
 
 ---
 
+<img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/d8a5b806-8648-48a3-9b03-76d6b48ad964" />
 
 
 # UML Activity Diagram with Swimlanes Description
