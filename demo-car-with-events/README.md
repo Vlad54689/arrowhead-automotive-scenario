@@ -62,6 +62,8 @@ The workflow begins when a quality inspection event is generated for a vehicle. 
 
 ---
 
+<img width="1491" height="1055" alt="image" src="https://github.com/user-attachments/assets/760cbbc1-586c-40d1-8571-9960d9d11dd4" />
+
 # Architecture Diagram Description
 
 The architecture diagram presents a high-level overview of the Automotive Quality Maintenance Traceability ecosystem deployed inside an Arrowhead Local Cloud. The upper section illustrates the Arrowhead core systems, namely the Service Registry, Authorization, Orchestrator, and Event Handler, which collectively provide service discovery, access control, orchestration, and event management functionalities.
@@ -71,6 +73,9 @@ The lower section contains the business services participating in the scenario. 
 The diagram emphasizes the event-driven communication model, where services interact asynchronously through event publication and subscription rather than through tightly coupled direct communication. This architectural approach increases scalability, modularity, and fault tolerance.
 
 ---
+
+<img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/f408d8be-62e1-48a7-a049-9b6d026d1afc" />
+
 
 # Message Sequence Chart (MSC) Description
 
@@ -82,6 +87,9 @@ The Traceability Log Service receives and stores both event types, ensuring comp
 
 ---
 
+<img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/40b45641-af82-46ba-abe6-ac1ee991367a" />
+
+
 # UML Component Diagram Description
 
 The UML Component Diagram presents the internal software organization of the system by illustrating the main application components, their interfaces, dependencies, and exchanged data structures. Each application service is represented as an independent component containing REST controllers, business logic modules, event consumers, and event publishers.
@@ -92,6 +100,9 @@ Additionally, the diagram highlights shared DTOs and event models used across th
 
 ---
 
+<img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/6ade5357-44e5-4c57-9915-df0135dcd551" />
+
+
 # UML Deployment Diagram Description
 
 The UML Deployment Diagram illustrates the physical deployment structure of the automotive traceability system. It describes how the Arrowhead core systems and application services are distributed across network nodes and interconnected through secure communication channels.
@@ -101,6 +112,8 @@ The upper section represents the Arrowhead core systems deployed as independent 
 The deployment view also illustrates the communication ports used by each service and highlights the use of secure HTTPS/TLS communication within the Arrowhead Local Cloud. Event-based interactions between services are represented separately from standard REST communication, emphasizing the hybrid communication architecture that combines synchronous APIs with asynchronous event propagation.
 
 ---
+
+
 
 # UML Activity Diagram with Swimlanes Description
 
