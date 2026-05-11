@@ -158,17 +158,6 @@ This activity diagram clearly illustrates the control flow, event flow, and dist
 
 ---
 
-## Automotive Quality Maintenance Traceability Scenario
-
-### Overview
-
-This scenario implements a complete **automotive quality maintenance traceability system** using Arrowhead's event-driven architecture. It demonstrates how multiple microservices can collaborate through publish-subscribe patterns to maintain a complete audit trail of quality inspections and maintenance recommendations.
-
-### Architecture
-
-<img width="1491" height="1055" alt="image" src="https://github.com/user-attachments/assets/760cbbc1-586c-40d1-8571-9960d9d11dd4" />
-
-
 ### Services
 
 #### 1. Quality Inspection Service
