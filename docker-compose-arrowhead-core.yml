@@ -1,0 +1,49 @@
+version: '3'
+
+services:
+  arrowhead_core_mysql:
+    container_name: arrowhead_core_mysql
+    image: mysql:5.7
+    environment:
+      - MYSQL_ROOT_PASSWORD=arrowhead_secure_password
+    volumes:
+      - arrowhead_core_mysql:/var/lib/mysql
+      - ./arrowhead-core/sql:/docker-entrypoint-initdb.d/
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-parrowhead_secure_password"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  arrowhead_core:
+    container_name: arrowhead_core
+    build: ./arrowhead-core
+    depends_on:
+      arrowhead_core_mysql:
+        condition: service_healthy
+    environment:
+      - JVM_FLAGS=-XX:+UseSerialGC -Xmx1G -Xms32m
+    volumes:
+      - ./arrowhead-core/properties/serviceregistry.properties:/opt/arrowhead-core/serviceregistry/application.properties
+      - ./arrowhead-core/properties/authorization.properties:/opt/arrowhead-core/authorization/application.properties
+      - ./arrowhead-core/properties/orchestrator.properties:/opt/arrowhead-core/orchestrator/application.properties
+      - ./arrowhead-core/properties/eventhandler.properties:/opt/arrowhead-core/eventhandler/application.properties
+      - ./arrowhead-core/properties/gatekeeper.properties:/opt/arrowhead-core/gatekeeper/application.properties
+      - ./arrowhead-core/properties/gateway.properties:/opt/arrowhead-core/gateway/application.properties
+      - ./arrowhead-core/properties/certificateauthority.properties:/opt/arrowhead-core/certificate-authority/application.properties
+      - ./arrowhead-core/sql/initSQL.sh:/docker-entrypoint-initdb.d/initSQL.sh
+      - ./arrowhead-core/sql/privileges:/docker-entrypoint-initdb.d/privileges
+    ports:
+      - "8443:8443" # Service Registry
+      - "8445:8445" # Authorization
+      - "8441:8441" # Orchestrator
+      - "8455:8455" # Event Handler
+      - "8449:8449" # Gatekeeper
+      - "8453:8453" # Gateway
+      - "8448:8448" # Certificate Authority
+
+volumes:
+  arrowhead_core_mysql:
+    external: true
