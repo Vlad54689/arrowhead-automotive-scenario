@@ -1,0 +1,5 @@
+-- Stub privileges file for the MSCV subsystem.
+-- create_empty_arrowhead_db.sql creates the `mscv` user inline and then `source`s this
+-- file. The upstream privilege script is not shipped in this repo and this subsystem is
+-- not used in the automotive scenario, so no grants are applied here.
+-- This stub exists only so the `source mscv_privileges.sql` line resolves.
