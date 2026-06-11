@@ -9,6 +9,11 @@ public class QualityInspectionConstants {
 
 	public static final String SERVICE_NAME = "quality-inspection-service";
 	public static final String SERVICE_TYPE = "quality-inspection";
+
+	// Arrowhead service registration (system name `qualityinspection`)
+	public static final String INSPECTION_SERVICE_DEFINITION = "inspection";
+	public static final String INSPECTION_URI = "/inspection";
+
 	public static final String INTERFACE_SECURE = "HTTP-SECURE-JSON";
 	public static final String INTERFACE_INSECURE = "HTTP-INSECURE-JSON";
 	public static final String HTTP_METHOD = "http-method";

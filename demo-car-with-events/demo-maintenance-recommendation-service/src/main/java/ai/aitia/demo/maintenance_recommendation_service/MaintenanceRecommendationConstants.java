@@ -9,6 +9,13 @@ public class MaintenanceRecommendationConstants {
 
 	public static final String SERVICE_NAME = "maintenance-recommendation-service";
 	public static final String SERVICE_TYPE = "maintenance-recommendation";
+
+	// Arrowhead service registration (system name `maintenancerecommendation`). This subscribe-only
+	// system must be known to the Service Registry before the Event Handler will accept a
+	// subscription, so we register its /notify endpoint.
+	public static final String NOTIFICATION_SERVICE_DEFINITION = "maintenance-recommendation-notify";
+	public static final String NOTIFICATION_URI = "/notify";
+
 	public static final String INTERFACE_SECURE = "HTTP-SECURE-JSON";
 	public static final String INTERFACE_INSECURE = "HTTP-INSECURE-JSON";
 	public static final String HTTP_METHOD = "http-method";

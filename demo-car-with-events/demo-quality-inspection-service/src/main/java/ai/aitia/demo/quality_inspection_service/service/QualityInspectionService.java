@@ -13,12 +13,17 @@ import org.springframework.stereotype.Service;
 import ai.aitia.demo.quality_inspection_service.database.InMemoryQualityInspectionDB;
 import ai.aitia.demo.quality_inspection_service.dto.QualityInspectionDTO;
 import ai.aitia.demo.quality_inspection_service.entity.QualityInspection;
+import ai.aitia.demo.quality_inspection_service.publisher.event.PresetEventType;
+import ai.aitia.demo.quality_inspection_service.publisher.service.PublisherService;
 
 @Service
 public class QualityInspectionService {
 
 	@Autowired
 	private InMemoryQualityInspectionDB database;
+
+	@Autowired
+	private PublisherService publisherService;
 
 	private final Random random = new Random();
 
@@ -33,6 +38,14 @@ public class QualityInspectionService {
 		inspection.setInspectionTimestamp(dto.getInspectionTimestamp());
 		final int id = database.create(inspection);
 		inspection.setId(id);
+
+		//Publish a quality.inspection.created event after the inspection is persisted
+		final String payload = "inspectionId=" + inspection.getId()
+				+ ";carId=" + inspection.getCarId()
+				+ ";inspectionResult=" + inspection.getInspectionResult()
+				+ ";timestamp=" + inspection.getInspectionTimestamp();
+		publisherService.publish(PresetEventType.QUALITY_INSPECTION_CREATED, null, payload);
+
 		return convertToDTO(inspection);
 	}
 
