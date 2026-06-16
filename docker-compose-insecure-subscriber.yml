@@ -1,0 +1,29 @@
+# Maintenance subscriber in INSECURE mode (HTTP, ssl=false), sharing the core container's
+# network namespace - the symmetric counterpart of docker-compose-secure-subscriber.yml.
+#
+# Identical topology to the secure subscriber (same image, container shares the core's net
+# stack, binds+advertises 127.0.0.1:9896, reaches SR/EH on 127.0.0.1). The ONLY differences
+# are security: no certificate mounts, no ssl/keystore/truststore args, plain HTTP.
+#
+# Run only against an INSECURE core (docker-compose-arrowhead-core-insecure.yml). Tear down
+# with: docker compose -f docker-compose-insecure-subscriber.yml down
+
+services:
+  maintenance-subscriber:
+    image: eclipse-temurin:17-jre-alpine
+    container_name: maintenance-subscriber
+    working_dir: /app
+    restart: "no"
+    network_mode: "container:arrowhead_core"
+    volumes:
+      - ./demo-car-with-events/demo-maintenance-recommendation-service/target/demo-maintenance-recommendation-service-4.4.0.2.jar:/app/app.jar:ro
+    command:
+      - java
+      - -jar
+      - /app/app.jar
+      - --server.ssl.enabled=false
+      - --token.security.filter.enabled=false
+      - --server.address=127.0.0.1
+      - --server.port=9896
+      - --sr_address=127.0.0.1
+      - --sr_port=8443
