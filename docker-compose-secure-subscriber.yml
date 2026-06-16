@@ -1,0 +1,48 @@
+# Phase 3 (mTLS): run the Maintenance subscriber sharing the CORE container's network
+# namespace (network_mode: container:arrowhead_core).
+#
+# Why this model:
+#   * The core systems advertise 127.0.0.1 (their domain.name). A subscriber with its
+#     own container IP can't reach them; a host subscriber can't be reached back by the
+#     Event Handler (container->host bridge is firewall-blocked).
+#   * Sharing the core's net namespace puts everyone on 127.0.0.1: MR reaches SR/EH/Auth
+#     at 127.0.0.1, binds 9896 there, advertises 127.0.0.1:9896, and the EH delivers to
+#     127.0.0.1:9896 in the same namespace.
+#   * 127.0.0.1 is in every cert's SAN, so TLS hostname verification stays STRICT
+#     (no disable.hostname.verifier) and mTLS is fully validated end to end.
+#
+# Touches nothing else: core compose/properties, the host publisher (QI), the insecure
+# baseline, and the submodule are all untouched. The cert/truststore are mounted read-only.
+# Tear down with: docker compose -f docker-compose-secure-subscriber.yml down
+
+services:
+  maintenance-subscriber:
+    image: eclipse-temurin:17-jre-alpine
+    container_name: maintenance-subscriber
+    working_dir: /app
+    restart: "no"
+    # Share the core container's network stack: all core services are on 127.0.0.1 here.
+    network_mode: "container:arrowhead_core"
+    volumes:
+      - ./demo-car-with-events/demo-maintenance-recommendation-service/target/demo-maintenance-recommendation-service-4.4.0.2.jar:/app/app.jar:ro
+      - ./sos-examples-spring/demo-car-with-events/demo-maintenance-recommendation-service/src/main/resources/certificates/maintenancerecommendation.p12:/app/maintenancerecommendation.p12:ro
+      - ./sos-examples-spring/demo-car-with-events/demo-maintenance-recommendation-service/src/main/resources/certificates/truststore.p12:/app/truststore.p12:ro
+    command:
+      - java
+      - -jar
+      - /app/app.jar
+      - --server.ssl.enabled=true
+      - --server.ssl.key-store-type=PKCS12
+      - --server.ssl.key-store=file:/app/maintenancerecommendation.p12
+      - --server.ssl.key-store-password=123456
+      - --server.ssl.key-alias=maintenancerecommendation
+      - --server.ssl.key-password=123456
+      - --server.ssl.client-auth=need
+      - --server.ssl.trust-store-type=PKCS12
+      - --server.ssl.trust-store=file:/app/truststore.p12
+      - --server.ssl.trust-store-password=123456
+      - --token.security.filter.enabled=false
+      - --server.address=127.0.0.1
+      - --server.port=9896
+      - --sr_address=127.0.0.1
+      - --sr_port=8443
