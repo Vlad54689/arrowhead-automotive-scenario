@@ -43,6 +43,17 @@ services:
       - ./arrowhead-core/properties/gatekeeper.properties:/opt/arrowhead-core/gatekeeper/application.properties
       - ./arrowhead-core/properties/gateway.properties:/opt/arrowhead-core/gateway/application.properties
       - ./arrowhead-core/properties/certificateauthority.properties:/opt/arrowhead-core/certificate-authority/application.properties
+      # --- mTLS (Phase 2): mount each core system's testcloud1 certificate + the shared
+      # truststore into the system's working dir (run.sh does `cd <system>` before launching the
+      # jar, so server.ssl.key-store=file:<name>.p12 resolves here). Read-only.
+      - ./core-java-spring/certificates/testcloud1/serviceregistry.p12:/opt/arrowhead-core/serviceregistry/serviceregistry.p12:ro
+      - ./core-java-spring/certificates/testcloud1/truststore.p12:/opt/arrowhead-core/serviceregistry/truststore.p12:ro
+      - ./core-java-spring/certificates/testcloud1/authorization.p12:/opt/arrowhead-core/authorization/authorization.p12:ro
+      - ./core-java-spring/certificates/testcloud1/truststore.p12:/opt/arrowhead-core/authorization/truststore.p12:ro
+      - ./core-java-spring/certificates/testcloud1/orchestrator.p12:/opt/arrowhead-core/orchestrator/orchestrator.p12:ro
+      - ./core-java-spring/certificates/testcloud1/truststore.p12:/opt/arrowhead-core/orchestrator/truststore.p12:ro
+      - ./core-java-spring/certificates/testcloud1/eventhandler.p12:/opt/arrowhead-core/eventhandler/eventhandler.p12:ro
+      - ./core-java-spring/certificates/testcloud1/truststore.p12:/opt/arrowhead-core/eventhandler/truststore.p12:ro
       - ./arrowhead-core/sql/initSQL.sh:/docker-entrypoint-initdb.d/initSQL.sh
       - ./arrowhead-core/sql/privileges:/docker-entrypoint-initdb.d/privileges
     ports:
