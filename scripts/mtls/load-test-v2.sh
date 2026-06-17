@@ -15,7 +15,8 @@
 #
 # Modes:
 #   secure   - POST https:// with a client certificate (mTLS). Subscriber runs as the
-#              `maintenance-subscriber` container; delivery is read from its docker logs.
+#              `maintenance-subscriber` container; delivery is read from its docker logs in
+#              BOTH modes (the subscriber is containerized in secure and insecure alike).
 #   insecure - POST http:// with no client cert. Subscriber delivery is read from a log file.
 #
 # Nothing here is destructive; it only sends inspections and reads logs. It does NOT run the
@@ -23,7 +24,9 @@
 #
 # Usage (env-overridable):
 #   MODE=secure   REQUESTS=200 LEVELS="1 5 10 20 50" OUT=results.csv  bash load-test-v2.sh
-#   MODE=insecure SUB_LOG=/tmp/maintenance.log ...                    bash load-test-v2.sh
+#   MODE=insecure REQUESTS=200 LEVELS="1 5 10 20 50" OUT=results.csv  bash load-test-v2.sh
+#   (delivery is read from `docker logs maintenance-subscriber` in both modes; override the
+#    subscriber container with SUB_CONTAINER, or read a host log file with SUB_LOG_FILE)
 #
 # Validation example (small):
 #   MODE=secure REQUESTS=10 LEVELS="5" OUT=/tmp/val.csv bash load-test-v2.sh
@@ -46,9 +49,12 @@ PUB_PATH="${PUB_PATH:-/quality-inspections}"
 CLIENT_P12="${CLIENT_P12:-$REPO_ROOT/core-java-spring/certificates/testcloud1/sysop.p12}"
 CLIENT_P12_PASS="${CLIENT_P12_PASS:-123456}"
 
-# delivery source
-SUB_CONTAINER="${SUB_CONTAINER:-maintenance-subscriber}"   # secure mode: docker logs
-SUB_LOG="${SUB_LOG:-/tmp/maintenance.log}"                 # insecure mode: log file
+# delivery source: by default read the subscriber CONTAINER's docker logs. The subscriber is
+# containerized in BOTH modes (secure and insecure share the same `maintenance-subscriber`
+# container), so the delivery source is independent of MODE. Set SUB_LOG_FILE to read a host
+# log file instead (legacy host-based subscriber).
+SUB_CONTAINER="${SUB_CONTAINER:-maintenance-subscriber}"
+SUB_LOG_FILE="${SUB_LOG_FILE:-}"
 DELIVERY_MARK="${DELIVERY_MARK:-Received event}"
 
 # asynchronous-delivery settling
@@ -71,9 +77,13 @@ if [ "$MODE" = secure ]; then
   openssl pkcs12 -legacy -in "$CLIENT_P12" -passin pass:"$CLIENT_P12_PASS" -nocerts -nodes  -out "$TMP/cli.key" 2>/dev/null
   [ -s "$TMP/cli.crt" ] && [ -s "$TMP/cli.key" ] || { echo "could not extract client cert from $CLIENT_P12"; exit 1; }
   export CERT="$TMP/cli.crt" KEY="$TMP/cli.key"
-  docker ps --format '{{.Names}}' | grep -qx "$SUB_CONTAINER" || { echo "subscriber container '$SUB_CONTAINER' not running"; exit 1; }
+fi
+
+# delivery-source check (independent of MODE)
+if [ -n "$SUB_LOG_FILE" ]; then
+  [ -f "$SUB_LOG_FILE" ] || echo "warning: subscriber log file '$SUB_LOG_FILE' not found (delivery will read 0)"
 else
-  [ -f "$SUB_LOG" ] || echo "warning: subscriber log '$SUB_LOG' not found (delivery will read 0)"
+  docker ps --format '{{.Names}}' | grep -qx "$SUB_CONTAINER" || { echo "subscriber container '$SUB_CONTAINER' not running"; exit 1; }
 fi
 
 # one request -> prints "<time_total> <http_code>"
@@ -92,10 +102,10 @@ delivered_count() {
   # grep -c always prints a single integer (0 when no match) but exits non-zero on 0;
   # capture the number and never rely on the exit code, so the result is one clean int.
   local n
-  if [ "$MODE" = secure ]; then
-    n="$(docker logs "$SUB_CONTAINER" 2>&1 | grep -c "$DELIVERY_MARK")"
+  if [ -n "$SUB_LOG_FILE" ]; then
+    n="$(grep -c "$DELIVERY_MARK" "$SUB_LOG_FILE" 2>/dev/null)"
   else
-    n="$(grep -c "$DELIVERY_MARK" "$SUB_LOG" 2>/dev/null)"
+    n="$(docker logs "$SUB_CONTAINER" 2>&1 | grep -c "$DELIVERY_MARK")"
   fi
   echo "${n:-0}"
 }
