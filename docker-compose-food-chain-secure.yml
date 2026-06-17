@@ -1,0 +1,79 @@
+# Food cold-chain SUBSCRIBERS in SECURE mode (HTTPS + mTLS), each sharing the core container's
+# network namespace - the secure counterpart of docker-compose-food-chain-insecure.yml and the
+# food analogue of docker-compose-secure-subscriber.yml (the automotive model).
+#
+# Two subscriber containers:
+#   risk-scoring-subscriber      127.0.0.1:9898  (subscriber + publisher; presents its cert as
+#                                                 SERVER on /notify AND as CLIENT when it publishes
+#                                                 risk.assessed and registers)
+#   supply-chain-trust-subscriber 127.0.0.1:9899 (subscriber risk.assessed)
+#
+# Everything is on 127.0.0.1 (the core's loopback, shared via network_mode), which is in every
+# cert's SAN -> TLS hostname verification stays STRICT (no disable.hostname.verifier), full mTLS.
+# Certs come from the MAIN repo (next to the real food code), mounted read-only.
+#
+# The ColdChain publisher (origin link) runs on the HOST (https://127.0.0.1:9897) - NOT here.
+#
+# Run only against a SECURE core (docker-compose-arrowhead-core.yml). Tear down with:
+#   docker compose -f docker-compose-food-chain-secure.yml down
+
+services:
+  risk-scoring-subscriber:
+    image: eclipse-temurin:17-jre-alpine
+    container_name: risk-scoring-subscriber
+    working_dir: /app
+    restart: "no"
+    network_mode: "container:arrowhead_core"
+    volumes:
+      - ./demo-car-with-events/demo-food-chain/demo-risk-scoring-service/target/demo-risk-scoring-service-4.4.0.2.jar:/app/app.jar:ro
+      - ./demo-car-with-events/demo-food-chain/demo-risk-scoring-service/src/main/resources/certificates/riskscoring.p12:/app/riskscoring.p12:ro
+      - ./demo-car-with-events/demo-food-chain/demo-risk-scoring-service/src/main/resources/certificates/truststore.p12:/app/truststore.p12:ro
+    command:
+      - java
+      - -jar
+      - /app/app.jar
+      - --server.ssl.enabled=true
+      - --server.ssl.key-store-type=PKCS12
+      - --server.ssl.key-store=file:/app/riskscoring.p12
+      - --server.ssl.key-store-password=123456
+      - --server.ssl.key-alias=riskscoring
+      - --server.ssl.key-password=123456
+      - --server.ssl.client-auth=need
+      - --server.ssl.trust-store-type=PKCS12
+      - --server.ssl.trust-store=file:/app/truststore.p12
+      - --server.ssl.trust-store-password=123456
+      - --token.security.filter.enabled=false
+      - --server.address=127.0.0.1
+      - --server.port=9898
+      - --sr_address=127.0.0.1
+      - --sr_port=8443
+
+  supply-chain-trust-subscriber:
+    image: eclipse-temurin:17-jre-alpine
+    container_name: supply-chain-trust-subscriber
+    working_dir: /app
+    restart: "no"
+    network_mode: "container:arrowhead_core"
+    volumes:
+      - ./demo-car-with-events/demo-food-chain/demo-supply-chain-trust-service/target/demo-supply-chain-trust-service-4.4.0.2.jar:/app/app.jar:ro
+      - ./demo-car-with-events/demo-food-chain/demo-supply-chain-trust-service/src/main/resources/certificates/supplychaintrust.p12:/app/supplychaintrust.p12:ro
+      - ./demo-car-with-events/demo-food-chain/demo-supply-chain-trust-service/src/main/resources/certificates/truststore.p12:/app/truststore.p12:ro
+    command:
+      - java
+      - -jar
+      - /app/app.jar
+      - --server.ssl.enabled=true
+      - --server.ssl.key-store-type=PKCS12
+      - --server.ssl.key-store=file:/app/supplychaintrust.p12
+      - --server.ssl.key-store-password=123456
+      - --server.ssl.key-alias=supplychaintrust
+      - --server.ssl.key-password=123456
+      - --server.ssl.client-auth=need
+      - --server.ssl.trust-store-type=PKCS12
+      - --server.ssl.trust-store=file:/app/truststore.p12
+      - --server.ssl.trust-store-password=123456
+      - --token.security.filter.enabled=false
+      - --server.address=127.0.0.1
+      - --server.port=9899
+      - --sr_address=127.0.0.1
+      - --sr_port=8443
