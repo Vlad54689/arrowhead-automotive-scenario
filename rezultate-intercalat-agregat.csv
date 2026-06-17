@@ -1,0 +1,5 @@
+mod,nivel,n_runs,rata_livrare_mean,rata_livrare_sd,throughput_publicare_mean,throughput_publicare_sd,latenta_medie_ok_mean,latenta_medie_ok_sd,p50_ok_mean,p50_ok_sd,p95_ok_mean,p95_ok_sd,p99_ok_mean,p99_ok_sd
+insecure,20,5,1.000,0.000,269.780,11.274,63.070,2.857,62.184,4.483,120.060,6.062,158.906,20.490
+insecure,50,5,1.000,0.000,337.260,11.718,120.512,4.757,89.646,6.473,365.664,27.904,493.034,48.916
+secure,20,5,1.000,0.000,179.680,4.864,94.238,2.544,87.572,8.161,192.318,16.240,250.718,17.615
+secure,50,5,1.000,0.000,239.560,8.287,170.064,3.973,123.808,18.744,506.108,48.058,632.388,87.604
