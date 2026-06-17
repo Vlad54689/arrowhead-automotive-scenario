@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>eu.arrowhead</groupId>
+		<artifactId>demo-car-with-events</artifactId>
+		<version>4.4.0.2</version>
+	</parent>
+
+	<artifactId>demo-food-chain</artifactId>
+	<packaging>pom</packaging>
+	<name>Arrowhead Demo Food Chain (multi-hop event chain)</name>
+
+	<!--
+		Second thesis scenario: a 3-hop, purely event-driven food cold-chain.
+		ColdChainMonitor (publisher) -> RiskScoring (subscriber+publisher) -> SupplyChainTrust (subscriber).
+		Built to measure CUMULATIVE end-to-end latency across a multi-hop event chain.
+		The Arrowhead client libraries are inherited from the grandparent "demo" pom
+		(arrowhead-application-library-java-spring), exactly like the automotive modules.
+	-->
+	<modules>
+		<module>demo-cold-chain-monitor-service</module>
+		<module>demo-risk-scoring-service</module>
+		<module>demo-supply-chain-trust-service</module>
+	</modules>
+</project>

@@ -1,0 +1,51 @@
+# Food cold-chain SUBSCRIBERS in INSECURE mode (HTTP, ssl=false), each sharing the core container's
+# network namespace - same topology as docker-compose-insecure-subscriber.yml (the automotive model).
+#
+# Two subscriber containers:
+#   risk-scoring-subscriber      127.0.0.1:9898  (subscriber coldchain.reading.created + publisher risk.assessed)
+#   supply-chain-trust-subscriber 127.0.0.1:9899 (subscriber risk.assessed, logs verdict + latency)
+#
+# The ColdChain publisher (origin link) runs on the HOST (127.0.0.1:9897), like the automotive
+# quality-inspection publisher - it is NOT part of this compose.
+#
+# Run only against an INSECURE core (docker-compose-arrowhead-core-insecure.yml). Tear down with:
+#   docker compose -f docker-compose-food-chain-insecure.yml down
+
+services:
+  risk-scoring-subscriber:
+    image: eclipse-temurin:17-jre-alpine
+    container_name: risk-scoring-subscriber
+    working_dir: /app
+    restart: "no"
+    network_mode: "container:arrowhead_core"
+    volumes:
+      - ./demo-car-with-events/demo-food-chain/demo-risk-scoring-service/target/demo-risk-scoring-service-4.4.0.2.jar:/app/app.jar:ro
+    command:
+      - java
+      - -jar
+      - /app/app.jar
+      - --server.ssl.enabled=false
+      - --token.security.filter.enabled=false
+      - --server.address=127.0.0.1
+      - --server.port=9898
+      - --sr_address=127.0.0.1
+      - --sr_port=8443
+
+  supply-chain-trust-subscriber:
+    image: eclipse-temurin:17-jre-alpine
+    container_name: supply-chain-trust-subscriber
+    working_dir: /app
+    restart: "no"
+    network_mode: "container:arrowhead_core"
+    volumes:
+      - ./demo-car-with-events/demo-food-chain/demo-supply-chain-trust-service/target/demo-supply-chain-trust-service-4.4.0.2.jar:/app/app.jar:ro
+    command:
+      - java
+      - -jar
+      - /app/app.jar
+      - --server.ssl.enabled=false
+      - --token.security.filter.enabled=false
+      - --server.address=127.0.0.1
+      - --server.port=9899
+      - --sr_address=127.0.0.1
+      - --sr_port=8443

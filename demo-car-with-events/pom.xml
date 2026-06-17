@@ -18,5 +18,6 @@
 	    <module>demo-quality-inspection-service</module>
 	    <module>demo-maintenance-recommendation-service</module>
 	    <module>demo-traceability-log-service</module>
+	    <module>demo-food-chain</module>
 	</modules>
 </project>
