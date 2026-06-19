@@ -28,8 +28,11 @@ PASSWORD="123456"
 REPS="${REPS:-5}"
 REQUESTS="${REQUESTS:-200}"
 WARMUP="${WARMUP:-50}"
-LOW_LEVELS="${LOW_LEVELS:-1 5 10}"
-HIGH_LEVELS="${HIGH_LEVELS:-20 50}"
+# Use ${VAR-default} (no colon) so an explicitly-empty value is HONORED (skips that phase);
+# the default applies only when the variable is unset. (${VAR:-default} would wrongly replace
+# an empty override with the default.)
+LOW_LEVELS="${LOW_LEVELS-1 5 10}"
+HIGH_LEVELS="${HIGH_LEVELS-20 50}"
 RAW_CSV="${RAW_CSV:-$REPO_ROOT/rezultate-foodchain-brut.csv}"
 
 INSEC_CORE="$REPO_ROOT/docker-compose-arrowhead-core-insecure.yml"
@@ -180,25 +183,35 @@ echo "  RAW=$RAW_CSV"
 echo "============================================================"
 
 # ---------- PHASE 1: LOW levels in blocks (one bring-up per mode, all reps) ----------
-for mode in insecure secure; do
-  echo ">>> [$(ts)] PHASE1 bring up $mode for LOW levels"
-  bring_up "$mode" || { echo "abort: bring_up $mode (low) failed"; exit 1; }
-  for rep in $(seq 1 "$REPS"); do
-    echo ">>> [$(ts)] PHASE1 $mode rep=$rep levels=[$LOW_LEVELS]"
-    measure "$mode" "$rep" "$LOW_LEVELS"
+# Skipped when LOW_LEVELS is empty (e.g. re-running a single level interleaved instead).
+if [ -n "${LOW_LEVELS// /}" ]; then
+  for mode in insecure secure; do
+    echo ">>> [$(ts)] PHASE1 bring up $mode for LOW levels"
+    bring_up "$mode" || { echo "abort: bring_up $mode (low) failed"; exit 1; }
+    for rep in $(seq 1 "$REPS"); do
+      echo ">>> [$(ts)] PHASE1 $mode rep=$rep levels=[$LOW_LEVELS]"
+      measure "$mode" "$rep" "$LOW_LEVELS"
+    done
   done
-done
+else
+  echo ">>> [$(ts)] PHASE1 skipped (LOW_LEVELS empty)"
+fi
 
 # ---------- PHASE 2: HIGH levels interleaved (both modes per rep, order flipped) ----------
-for rep in $(seq 1 "$REPS"); do
-  if [ $((rep % 2)) -eq 1 ]; then order="insecure secure"; else order="secure insecure"; fi
-  echo ">>> [$(ts)] PHASE2 REP $rep (order: $order) levels=[$HIGH_LEVELS]"
-  for mode in $order; do
-    echo ">>> [$(ts)] PHASE2 rep=$rep bring up $mode"
-    bring_up "$mode" || { echo "abort: bring_up $mode (high) failed"; exit 1; }
-    measure "$mode" "$rep" "$HIGH_LEVELS"
+# Skipped when HIGH_LEVELS is empty. Any level put here is measured drift-free (interleaved).
+if [ -n "${HIGH_LEVELS// /}" ]; then
+  for rep in $(seq 1 "$REPS"); do
+    if [ $((rep % 2)) -eq 1 ]; then order="insecure secure"; else order="secure insecure"; fi
+    echo ">>> [$(ts)] PHASE2 REP $rep (order: $order) levels=[$HIGH_LEVELS]"
+    for mode in $order; do
+      echo ">>> [$(ts)] PHASE2 rep=$rep bring up $mode"
+      bring_up "$mode" || { echo "abort: bring_up $mode (high) failed"; exit 1; }
+      measure "$mode" "$rep" "$HIGH_LEVELS"
+    done
   done
-done
+else
+  echo ">>> [$(ts)] PHASE2 skipped (HIGH_LEVELS empty)"
+fi
 
 echo "============================================================"
 echo "FOODCHAIN FULL BATTERY  done=$(date '+%F %T')"
